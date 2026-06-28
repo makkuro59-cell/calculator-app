@@ -108,9 +108,9 @@ public class CalculatorFrame extends JFrame {
     }
 
     /**
-     * クリックされたボタンの種類（コマンド）を判定し、対応するコントローラーのメソッドを呼び出します。
+     * クリックされたボタンの種類（コマンド）を判定し、対応するコントローラーのメソッドを呼び出す
      *
-     * @param cmd クリックされたボタンのテキスト文字列（例: "7", "+", "=" など）
+     * @param cmd クリックされたボタンのテキスト文字列（数字や演算子など）
      * @param c   イベントの通知先となる CalculatorController のインスタンス
      */
     public void handleButtonClick(String cmd, CalculatorController c) {
