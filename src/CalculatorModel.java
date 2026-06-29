@@ -1,8 +1,8 @@
 import java.math.BigDecimal;
 
 /**
- * 電卓の内部データ、計算ロジック、および入力状態を管理するモデルクラスです。
- * 高精度な計算を行うために {@link BigDecimal} を使用しています。
+ * 電卓の内部データ、計算ロジック、および入力状態を管理するクラス
+ * 高精度な計算を行うために {@link BigDecimal} を使用
  */
 public class CalculatorModel {
     /** 左辺の値、またはこれまでの計算結果の蓄積 */
