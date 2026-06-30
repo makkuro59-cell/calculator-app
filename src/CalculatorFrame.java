@@ -102,7 +102,8 @@ public class CalculatorFrame extends JFrame {
             JButton button = (JButton) comp;
 
             // ボタンがクリックされたときの動作を登録
-            // e.getActionCommand() でボタンに書かれた文字（数字 や 演算子 など）を取得し、それを handleButtonClickメソッドに渡す
+            // e.getActionCommand() でボタンに書かれた文字（数字 や 演算子 など）を取得し、それを
+            // handleButtonClickメソッドに渡す
             button.addActionListener(e -> handleButtonClick(e.getActionCommand(), c));
         }
     }
@@ -114,11 +115,27 @@ public class CalculatorFrame extends JFrame {
      * @param c   イベントの通知先となる CalculatorController のインスタンス
      */
     public void handleButtonClick(String cmd, CalculatorController c) {
+        // ボタンの文字列（cmd）の値に応じて、処理を複数に分岐
         switch (cmd) {
+            // 押されたボタンが "0" から "9" のいずれかの数字だった場合の処理
+            // cmd.charAt(0) を使って、String型（文字列）の1文字目を char型（文字）に変換してコントローラーの onDigit に渡す
             case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" -> c.onDigit(cmd.charAt(0));
+
+            // 押されたボタンが小数点「.」だった場合の処理
+            // コントローラーの onDot メソッドを呼び出す
             case "." -> c.onDot();
+
+            // 押されたボタンが「+」「-」「×」「÷」のいずれかの計算記号（演算子）だった場合の処理
+            // CalculatorModel内にある fromString メソッドを使って、画面の文字を電卓専用の列挙型（Operator型）に変換
+            // コントローラーの onOperator メソッドを呼び出す
             case "+", "-", "×", "÷" -> c.onOperator(CalculatorModel.Operator.fromString(cmd));
+
+            // 押されたボタンがイコール「=」だった場合の処理
+            // コントローラーの onEquals メソッドを呼び出す
             case "=" -> c.onEquals();
+
+            // 押されたボタンがクリア「C」だった場合の処理
+            // コントローラーの onClear メソッドを呼び出す
             case "C" -> c.onClear();
         }
     }

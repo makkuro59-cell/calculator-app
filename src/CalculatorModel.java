@@ -2,33 +2,33 @@ import java.math.BigDecimal;
 
 /**
  * 電卓の内部データ、計算ロジック、および入力状態を管理するクラス
- * 高精度な計算を行うために {@link BigDecimal} を使用
+ * {@link BigDecimal} を使用
  */
 public class CalculatorModel {
-    /** 左辺の値、またはこれまでの計算結果の蓄積 */
+    /** 左辺の値、またはこれまでの計算結果を保持する変数 */
     private BigDecimal leftOperand;
-    /** 現在ユーザーが入力中の文字列を保持するバッファ */
+    /** 現在ユーザーが入力中の文字列を保持する変数 */
     private StringBuilder currentInput;
 
     /**
-     * 四則演算の演算子を定義する列挙型です。
+     * 四則演算の演算子を定義する列挙型
      */
     public enum Operator {
         /** 加算（+） */
-        ADD, 
+        ADD,
         /** 減算（-） */
-        SUB, 
+        SUB,
         /** 乗算（×） */
-        MUL, 
+        MUL,
         /** 除算（÷） */
         DIV;
 
         /**
-         * 画面上のボタン文字に対応する演算子の列挙型を返します。
+         * 画面上のボタン文字に対応する演算子の列挙型を返す
          *
          * @param cmd 演算子を表す文字列（"+", "-", "×", "÷"）
          * @return 対応する Operator 列挙型
-         * @throws IllegalArgumentException 未知の演算子文字列が渡された場合
+         * @throws IllegalArgumentException （"+", "-", "×", "÷"）以外の演算子文字列が渡された場合
          */
         public static Operator fromString(String cmd) {
             return switch (cmd) {
@@ -45,7 +45,7 @@ public class CalculatorModel {
     private Operator pendingOP;
 
     /**
-     * 電卓の入力・計算状態を表す列挙型です。
+     * 電卓の入力・計算状態を表す列挙型
      */
     public enum InputState {
         /** 初期状態、またはクリア直後・計算完了後の状態 */
@@ -64,8 +64,8 @@ public class CalculatorModel {
     private final int maxDigits = 8;
 
     /**
-     * CalculatorModel のコンストラクタです。
-     * 内部データを初期化し、電卓を READY 状態にします。
+     * CalculatorModel のコンストラクタ
+     * 内部データを初期化し、電卓を READY 状態にする
      */
     public CalculatorModel() {
         this.leftOperand = BigDecimal.ZERO;
@@ -80,7 +80,8 @@ public class CalculatorModel {
      * @param ch 入力された数字の文字
      */
     public void appendDigit(char ch) {
-        if (state == InputState.ERROR) return;
+        if (state == InputState.ERROR)
+            return;
         if (state == InputState.READY || state == InputState.INPUT_OPERATOR) {
             currentInput.setLength(0);
             state = InputState.INPUT_NUMBER;
@@ -102,7 +103,8 @@ public class CalculatorModel {
      * 新規入力の最初に押された場合は自動的に "0." から開始します。
      */
     public void appendDot() {
-        if (state == InputState.ERROR) return;
+        if (state == InputState.ERROR)
+            return;
         if (state == InputState.READY || state == InputState.INPUT_OPERATOR) {
             currentInput.setLength(0);
             currentInput.append("0");
@@ -121,7 +123,8 @@ public class CalculatorModel {
      * @param op 入力された演算子（Operator型）
      */
     public void inputOperator(Operator op) {
-        if (state == InputState.ERROR) return;
+        if (state == InputState.ERROR)
+            return;
         if (currentInput.length() > 0) {
             equalsOp();
         }
@@ -134,7 +137,8 @@ public class CalculatorModel {
      * 計算結果は左辺（leftOperand）に格納され、入力バッファはクリアされます。
      */
     public void equalsOp() {
-        if (state == InputState.ERROR) return;
+        if (state == InputState.ERROR)
+            return;
         if (currentInput.length() == 0) {
             return;
         }
@@ -194,16 +198,20 @@ public class CalculatorModel {
      */
     private BigDecimal calculate(BigDecimal left, BigDecimal right, Operator op) {
         switch (op) {
-            case ADD: return left.add(right);
-            case SUB: return left.subtract(right);
-            case MUL: return left.multiply(right);
+            case ADD:
+                return left.add(right);
+            case SUB:
+                return left.subtract(right);
+            case MUL:
+                return left.multiply(right);
             case DIV:
                 if (right.compareTo(BigDecimal.ZERO) == 0) {
                     state = InputState.ERROR;
                     return BigDecimal.ZERO;
                 }
                 return left.divide(right, maxDigits, java.math.RoundingMode.HALF_UP);
-            default: return BigDecimal.ZERO;
+            default:
+                return BigDecimal.ZERO;
         }
     }
 
