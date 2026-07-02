@@ -40,7 +40,7 @@ public class CalculatorFrame extends JFrame {
         add(this.displayLabel, BorderLayout.NORTH);
 
         // フォントを「Arial」、太字（Font.BOLD）、サイズ「36」に設定
-        displayLabel.setFont(new Font("Arial", Font.BOLD, 36));
+        displayLabel.setFont(new Font("MS Gothic", Font.BOLD, 36));
 
         // ディスプレイの文字の周囲に余白（上・左・下・右に各20ピクセル）を設定
         displayLabel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));

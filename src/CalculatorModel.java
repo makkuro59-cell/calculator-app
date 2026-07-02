@@ -68,39 +68,60 @@ public class CalculatorModel {
      * 内部データを初期化し、電卓を READY 状態にする
      */
     public CalculatorModel() {
+        // これまでの計算結果や左辺の値を保持する leftOperand を「0（ZERO）」にリセット
         this.leftOperand = BigDecimal.ZERO;
+
+        // ユーザーが現在キーパッドで入力している数字の文字列を溜めておくためのバッファ（StringBuilder）を生成
         this.currentInput = new StringBuilder();
+
+        // 電卓の現在の入力状態（state）を、操作を受け付けられる「READY（準備完了）」状態に設定
         this.state = InputState.READY;
     }
 
     /**
-     * 入力された数字（0-9）を現在の入力文字列に追加します。
-     * 符号と小数点を除いた純粋な数字の桁数が maxDigits（8桁）未満の場合のみ追加を受け入れます。
+     * 入力された数字（0～9）を現在の入力文字列に追加
+     * 符号と小数点を除いた純粋な数字の桁数が maxDigits（8桁）未満の場合のみ追加する
      *
      * @param ch 入力された数字の文字
      */
     public void appendDigit(char ch) {
+        // 現在の電卓の状態が「ERROR」だった場合の処理
         if (state == InputState.ERROR)
+            // これ以降の処理を何もせず終了
             return;
+
+        // 現在の状態が「READY」または「INPUT_OPERATOR」だった場合の処理
         if (state == InputState.READY || state == InputState.INPUT_OPERATOR) {
+            // 新しい数字の入力を新しく始めるため、入力用バッファ（currentInput）を桁数0にリセット
             currentInput.setLength(0);
+
+            // 電卓の状態を「INPUT_NUMBER」へ切り替え
             state = InputState.INPUT_NUMBER;
         }
+
+        // 桁数を数えるためのカウンター
         int count = 0;
+
+        // 現在入力されている文字列を、1文字目から順番に最後の文字までループ処理で確認
         for (int i = 0; i < currentInput.length(); i++) {
+            // 取り出した文字が、小数点「.」ではなく、かつマイナス記号「-」でもない場合の処理
             if (currentInput.charAt(i) != '.' && currentInput.charAt(i) != '-') {
+                // 小数点「.」ではなく、かつマイナス記号「-」でもない場合桁数のカウントを 1 増やす
                 count++;
             }
         }
+
+        // 数えた数字の桁数が、最大桁数（maxDigits）より小さいか確認
         if (count < maxDigits) {
+            // 8桁未満であれば、入力用バッファの末尾に新しく押された数字（ch）を追加（8桁以上のときは無視する）
             currentInput.append(ch);
         }
     }
 
     /**
-     * 現在の入力文字列に小数点を追加します。
-     * すでに小数点が含まれている場合は重複して追加しません。
-     * 新規入力の最初に押された場合は自動的に "0." から開始します。
+     * 現在の入力文字列に小数点を追加
+     * すでに小数点が含まれている場合は追加しない
+     * 新規入力の最初に押された場合は自動的に "0." から開始
      */
     public void appendDot() {
         if (state == InputState.ERROR)
@@ -143,10 +164,17 @@ public class CalculatorModel {
             return;
         }
         BigDecimal rightOperand = new BigDecimal(currentInput.toString());
-        if (pendingOP != null) {
-            leftOperand = calculate(leftOperand, rightOperand, pendingOP);
-        } else {
+        if (pendingOP == null) {
             leftOperand = rightOperand;
+        } else {
+            try {
+                leftOperand = calculate(leftOperand, rightOperand, pendingOP);
+            } catch (ArithmeticException e) {
+                state = InputState.ERROR;
+                ErrorHandler errorHandler = new ErrorHandler();
+                errorHandler.handle(e);
+                return;
+            }
         }
         pendingOP = null;
         currentInput.setLength(0);
@@ -205,10 +233,6 @@ public class CalculatorModel {
             case MUL:
                 return left.multiply(right);
             case DIV:
-                if (right.compareTo(BigDecimal.ZERO) == 0) {
-                    state = InputState.ERROR;
-                    return BigDecimal.ZERO;
-                }
                 return left.divide(right, maxDigits, java.math.RoundingMode.HALF_UP);
             default:
                 return BigDecimal.ZERO;
