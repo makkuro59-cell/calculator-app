@@ -31,6 +31,7 @@ public class CalculatorModel {
          * @throws IllegalArgumentException （"+", "-", "×", "÷"）以外の演算子文字列が渡された場合
          */
         public static Operator fromString(String cmd) {
+            // 渡された文字列（cmd）の値に応じて、対応する Operator 列挙型を返す
             return switch (cmd) {
                 case "+" -> ADD;
                 case "-" -> SUB;
@@ -124,14 +125,20 @@ public class CalculatorModel {
      * 新規入力の最初に押された場合は自動的に "0." から開始
      */
     public void appendDot() {
+        // 現在の電卓の状態が「ERROR」だった場合の処理
         if (state == InputState.ERROR)
+            // これ以降の処理を何もせず終了
             return;
+
+        // 現在の状態が「READY」または「INPUT_OPERATOR」だった場合の処理
         if (state == InputState.READY || state == InputState.INPUT_OPERATOR) {
-            currentInput.setLength(0);
-            currentInput.append("0");
-            state = InputState.INPUT_NUMBER;
+            return;
+
         }
+
+        // 入力用バッファの中にすでに小数点「.」が含まれているかを確認
         if (currentInput.indexOf(".") == -1) {
+            // 小数点が含まれていない場合のみ、入力用バッファの末尾に小数点を追加
             currentInput.append(".");
         }
     }
@@ -144,12 +151,21 @@ public class CalculatorModel {
      * @param op 入力された演算子（Operator型）
      */
     public void inputOperator(Operator op) {
+        // 現在の電卓の状態が「ERROR」だった場合の処理
         if (state == InputState.ERROR)
+            // これ以降の処理を何もせず終了
             return;
+
+        // 入力用バッファに数値が入力されているかを確認
         if (currentInput.length() > 0) {
+            // 数値が入力されている場合は、連鎖計算のため保留中の計算を先に実行
             equalsOp();
         }
+
+        // 新しく押された演算子を保留中の演算子（pendingOP）として保持
         pendingOP = op;
+
+        // 電卓の状態を「INPUT_OPERATOR」へ切り替え
         state = InputState.INPUT_OPERATOR;
     }
 
@@ -158,26 +174,50 @@ public class CalculatorModel {
      * 計算結果は左辺（leftOperand）に格納され、入力バッファはクリアされます。
      */
     public void equalsOp() {
+        // 現在の電卓の状態が「ERROR」だった場合の処理
         if (state == InputState.ERROR)
+            // これ以降の処理を何もせず終了
             return;
+
+        // 入力用バッファが空（右辺が未入力）かどうかを確認
         if (currentInput.length() == 0) {
+            // 右辺が未入力の場合は、これ以降の処理を行わず終了
             return;
         }
+
+        // 入力用バッファの文字列を BigDecimal型に変換し、右辺の値として取得
         BigDecimal rightOperand = new BigDecimal(currentInput.toString());
+
+        // 保留中の演算子（pendingOP）が設定されていないかどうかを確認
         if (pendingOP == null) {
+            // 演算子が未設定の場合は、右辺の値をそのまま左辺（leftOperand）に格納
             leftOperand = rightOperand;
         } else {
             try {
+                // 保留中の演算子を使って、左辺と右辺の計算を実行し、結果を左辺（leftOperand）に格納
                 leftOperand = calculate(leftOperand, rightOperand, pendingOP);
             } catch (ArithmeticException e) {
+                // ゼロ除算などの計算エラーが発生した場合、状態を「ERROR」に変更
                 state = InputState.ERROR;
+
+                // エラー処理を行うための ErrorHandler のインスタンスを生成
                 ErrorHandler errorHandler = new ErrorHandler();
+
+                // 発生した例外をエラーハンドラーに渡して処理
                 errorHandler.handle(e);
+
+                // エラー発生時はこれ以降の処理を行わず終了
                 return;
             }
         }
+
+        // 計算が完了したため、保留中の演算子をリセット
         pendingOP = null;
+
+        // 入力用バッファをリセットし、次の入力に備える
         currentInput.setLength(0);
+
+        // 電卓の状態を「READY」へ切り替え
         state = InputState.READY;
     }
 
@@ -186,38 +226,59 @@ public class CalculatorModel {
      * オールクリア（C）ボタンが押された際に呼び出されます。
      */
     public void clearAll() {
+        // 左辺の値（leftOperand）を「0（ZERO）」にリセット
         leftOperand = BigDecimal.ZERO;
+
+        // 入力用バッファ（currentInput）をリセット
         currentInput.setLength(0);
+
+        // 保留中の演算子（pendingOP）をリセット
         pendingOP = null;
+
+        // 電卓の状態を「READY（準備完了）」に戻す
         state = InputState.READY;
     }
 
     /**
-     * 画面のテキスト表示用に、現在の適切な表示文字列（入力中の数値、または計算結果）を組み立てて返します。
-     * 計算結果の表示時には {@link FormatterUtil} を使用して適切なフォーマットや指数変換を行います。
+     * 画面のテキスト表示用に、現在の適切な表示文字列（入力中の数値、または計算結果）を組み立てて返す。
+     * 計算結果の表示時には {@link FormatterUtil} を使用して適切なフォーマットや指数変換を行う
      *
      * @return 画面に表示すべきフォーマット済みの文字列
      */
     public String getDisplayText() {
+        // 現在の電卓の状態が「ERROR」だった場合の処理
         if (state == InputState.ERROR) {
+            // エラー状態の場合は「エラー」という文字列を返す
             return "エラー";
         }
+
+        // 表示用の文字列を組み立てるための StringBuilder を生成
         StringBuilder display = new StringBuilder();
+
+        // 入力用バッファに入力中の文字列があるかどうかを確認
         if (currentInput.length() > 0) {
+            // 入力中の文字列がある場合は、その文字列をそのまま表示用に追加
             display.append(currentInput.toString());
         } else {
+            // 入力中の文字列がない場合は、左辺の値をフォーマットして表示用に追加
             display.append(FormatterUtil.formatForDisplay(leftOperand, maxDigits));
         }
+
+        // 保留中の演算子があり、かつ状態が「INPUT_OPERATOR」であるかを確認
         if (pendingOP != null && state == InputState.INPUT_OPERATOR) {
+            // 演算子の前に半角スペースを追加
             display.append(" ");
+            // 保留中の演算子を記号文字列に変換して表示用に追加
             display.append(operatorToSymbol(pendingOP));
         }
+
+        // 組み立てた表示用の文字列を返す
         return display.toString();
     }
 
     /**
-     * 2つの値（左辺、右辺）と演算子を元に、実際の四則演算を実行します。
-     * ゼロ除算が発生した場合は、状態を ERROR に変更し、0 を返します。
+     * 2つの値（左辺、右辺）と演算子を元に、実際の四則演算を実行
+     * ゼロ除算が発生した場合は、状態を ERROR に変更し0 を返す。
      *
      * @param left  左辺の値
      * @param right 右辺の値
@@ -225,30 +286,24 @@ public class CalculatorModel {
      * @return 計算結果の BigDecimal
      */
     private BigDecimal calculate(BigDecimal left, BigDecimal right, Operator op) {
+        // 演算子の種類に応じて処理を分岐
         switch (op) {
             case ADD:
+                // 加算（+）の場合、左辺と右辺を足した結果を返す
                 return left.add(right);
             case SUB:
+                // 減算（-）の場合、左辺から右辺を引いた結果を返す
                 return left.subtract(right);
             case MUL:
+                // 乗算（×）の場合、左辺と右辺を掛けた結果を返す
                 return left.multiply(right);
             case DIV:
+                // 除算（÷）の場合、左辺を右辺で割った結果を返す
                 return left.divide(right, maxDigits, java.math.RoundingMode.HALF_UP);
             default:
+                // 想定外の演算子だった場合は「0」を返す
                 return BigDecimal.ZERO;
         }
-    }
-
-    /**
-     * 現在、電卓が操作を受け付けられる状態かどうかを判定します。
-     *
-     * @return 操作可能な場合は true、エラー状態の場合は false
-     */
-    private boolean isActionAllowed() {
-        if (state == InputState.ERROR) {
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -258,6 +313,7 @@ public class CalculatorModel {
      * @return 演算子記号の文字列 ("+", "-", "×", "÷")
      */
     private String operatorToSymbol(Operator op) {
+        // 内部の演算子（Operator）を対応する記号文字列に変換して返す
         return switch (op) {
             case ADD -> "+";
             case SUB -> "-";
