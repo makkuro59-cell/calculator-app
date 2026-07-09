@@ -64,6 +64,11 @@ public class CalculatorModel {
     /** 入力および計算で許容される最大桁数（8桁） */
     private final int maxDigits = 8;
 
+    private boolean justCleared() {
+        clearAll();
+        return true;
+    }
+
     /**
      * CalculatorModel のコンストラクタ
      * 内部データを初期化し、電卓を READY 状態にする
@@ -158,11 +163,11 @@ public class CalculatorModel {
 
         // 入力用バッファに数値が入力されているかを確認
         if (currentInput.length() > 0) {
-            // 数値が入力されている場合は、連鎖計算のため保留中の計算を先に実行
+            // 数値が入力されている場合は、保留中の計算を先に実行
             equalsOp();
         }
 
-        // 新しく押された演算子を保留中の演算子（pendingOP）として保持
+        // 新しく押された演算子を保留中の演算子として保持
         pendingOP = op;
 
         // 電卓の状態を「INPUT_OPERATOR」へ切り替え
@@ -254,22 +259,32 @@ public class CalculatorModel {
 
         // 表示用の文字列を組み立てるための StringBuilder を生成
         StringBuilder display = new StringBuilder();
+        if (pendingOP == null) {
+            if (currentInput.length() == 0) {
+                display.append(FormatterUtil.formatForDisplay(leftOperand, maxDigits));
+            } else {
+                display.append(currentInput.toString());
 
-        // 入力用バッファに入力中の文字列があるかどうかを確認
-        if (currentInput.length() > 0) {
-            // 入力中の文字列がある場合は、その文字列をそのまま表示用に追加
-            display.append(currentInput.toString());
-        } else {
-            // 入力中の文字列がない場合は、左辺の値をフォーマットして表示用に追加
-            display.append(FormatterUtil.formatForDisplay(leftOperand, maxDigits));
+            }
         }
 
-        // 保留中の演算子があり、かつ状態が「INPUT_OPERATOR」であるかを確認
-        if (pendingOP != null && state == InputState.INPUT_OPERATOR) {
-            // 演算子の前に半角スペースを追加
-            display.append(" ");
-            // 保留中の演算子を記号文字列に変換して表示用に追加
-            display.append(operatorToSymbol(pendingOP));
+        // 保留中の演算子があるかを確認
+        if (pendingOP != null) {
+
+            getDisplayString();
+
+            if (currentInput.length() == 0) {
+                display.append(getDisplayString());
+            }
+
+            if (currentInput.length() > 0) {
+                display.append(getDisplayString());
+                // 演算子の前に半角スペースを追加
+                display.append(" ");
+                // 入力中の文字列がある場合は、そのまま表示用に追加
+                display.append(currentInput.toString());
+            }
+
         }
 
         // 組み立てた表示用の文字列を返す
@@ -320,5 +335,16 @@ public class CalculatorModel {
             case MUL -> "×";
             case DIV -> "÷";
         };
+    }
+
+    private String getDisplayString() {
+        StringBuilder display = new StringBuilder();
+        // 入力中の文字列が空の場合は、左辺の値を表示用に追加
+        display.append(FormatterUtil.formatForDisplay(leftOperand, maxDigits));
+        // 演算子の前に半角スペースを追加
+        display.append(" ");
+        // 保留中の演算子を記号文字列に変換して表示用に追加
+        display.append(operatorToSymbol(pendingOP));
+        return display.toString();
     }
 }
