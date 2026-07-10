@@ -128,7 +128,7 @@ public class CalculatorModel {
      * 新規入力の最初に押された場合は自動的に "0." から開始
      */
     public void appendDot() {
-        if (justCleared==true) {
+        if (justCleared == true) {
             return;
         }
         // 現在の電卓の状態が「ERROR」だった場合の処理
@@ -201,7 +201,7 @@ public class CalculatorModel {
         } else {
             try {
                 // 保留中の演算子を使って、左辺と右辺の計算を実行し、結果を左辺（leftOperand）に格納
-                leftOperand = calculate(leftOperand, rightOperand, pendingOP);
+                leftOperand = apply(leftOperand, rightOperand, pendingOP);
             } catch (ArithmeticException e) {
                 // ゼロ除算などの計算エラーが発生した場合、状態を「ERROR」に変更
                 state = InputState.ERROR;
@@ -302,7 +302,7 @@ public class CalculatorModel {
      * @param op    実行する演算子
      * @return 計算結果の BigDecimal
      */
-    private BigDecimal calculate(BigDecimal left, BigDecimal right, Operator op) {
+    public BigDecimal apply(BigDecimal left, BigDecimal right, Operator op) {
         // 演算子の種類に応じて処理を分岐
         switch (op) {
             case ADD:
