@@ -11,7 +11,6 @@ public class CalculatorApp {
      * Swingのイベントディスパッチスレッド上で、モデル・ビュー・コントローラーの生成、および画面表示を行う
      */
     public CalculatorApp() {
-        // Swingのイベントディスパッチスレッド（EDT）上で画面生成処理を実行するようスケジュール
         SwingUtilities.invokeLater(() -> {
             // 電卓の内部データや計算ロジックを管理するmodelのインスタンスを生成
             CalculatorModel model = new CalculatorModel();
