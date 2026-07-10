@@ -64,10 +64,7 @@ public class CalculatorModel {
     /** 入力および計算で許容される最大桁数（8桁） */
     private final int maxDigits = 8;
 
-    private boolean justCleared() {
-        clearAll();
-        return true;
-    }
+    private boolean justCleared = false;
 
     /**
      * CalculatorModel のコンストラクタ
@@ -121,6 +118,7 @@ public class CalculatorModel {
         if (count < maxDigits) {
             // 8桁未満であれば、入力用バッファの末尾に新しく押された数字（ch）を追加（8桁以上のときは無視する）
             currentInput.append(ch);
+            justCleared = false;
         }
     }
 
@@ -130,6 +128,9 @@ public class CalculatorModel {
      * 新規入力の最初に押された場合は自動的に "0." から開始
      */
     public void appendDot() {
+        if (justCleared==true) {
+            return;
+        }
         // 現在の電卓の状態が「ERROR」だった場合の処理
         if (state == InputState.ERROR)
             // これ以降の処理を何もせず終了
@@ -231,6 +232,7 @@ public class CalculatorModel {
      * オールクリア（C）ボタンが押された際に呼び出されます。
      */
     public void clearAll() {
+        justCleared = true;
         // 左辺の値（leftOperand）を「0（ZERO）」にリセット
         leftOperand = BigDecimal.ZERO;
 
