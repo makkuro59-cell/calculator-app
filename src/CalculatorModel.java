@@ -37,7 +37,7 @@ public class CalculatorModel {
                 case "-" -> SUB;
                 case "×" -> MUL;
                 case "÷" -> DIV;
-                default -> throw new IllegalArgumentException("未知の演算子: " + cmd);
+                default -> throw new IllegalArgumentException("演算子以外: " + cmd);
             };
         }
     }
@@ -64,7 +64,7 @@ public class CalculatorModel {
     /** 入力および計算で許容される最大桁数（8桁） */
     private final int maxDigits = 8;
 
-    private boolean justCleared = false;
+    private boolean justCleared = true;
 
     /**
      * CalculatorModel のコンストラクタ
@@ -162,6 +162,23 @@ public class CalculatorModel {
             // これ以降の処理を何もせず終了
             return;
 
+        if (op == Operator.SUB && currentInput.length() == 1 && currentInput.charAt(0) == '-') {
+            return;
+        }
+
+        if (currentInput.length() == 0 && op == Operator.SUB) {
+            currentInput.append("-");
+            state = InputState.INPUT_NUMBER;
+            justCleared = false;
+            return;
+
+        }
+
+        if (currentInput.length() == 0 && pendingOP == null && justCleared) {
+            // まだ何も入力・計算していない状態での演算子入力は無視
+            return;
+        }
+
         // 入力用バッファに数値が入力されているかを確認
         if (currentInput.length() > 0) {
             // 数値が入力されている場合は、保留中の計算を先に実行
@@ -225,6 +242,8 @@ public class CalculatorModel {
 
         // 電卓の状態を「READY」へ切り替え
         state = InputState.READY;
+
+        justCleared = false;
     }
 
     /**
