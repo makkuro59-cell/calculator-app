@@ -7,18 +7,7 @@ import java.util.Locale;
 
 public class FormatterUtil {
 
-    /**
-     * 画面表示用のテキストをフォーマットする
-     * null または空文字の場合は "0" を返す
-     */
-    public static String formatDisplayText(String text) {
-        if (text == null || text.isEmpty()) {
-            // textがnull/空文字の場合は "0" を返す
-            return "0";
-        }
-        // それ以外はそのまま返す
-        return text;
-    }
+
 
     /**
      * 計算結果を画面表示用にフォーマット

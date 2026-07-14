@@ -87,11 +87,11 @@ public class CalculatorModel {
      *
      * @param ch 入力された数字の文字
      */
-    public void appendDigit(char ch) {
+    public boolean appendDigit(char ch) {
         // 現在の電卓の状態が「ERROR」だった場合の処理
         if (state == InputState.ERROR)
             // これ以降の処理を何もせず終了
-            return;
+            return false;
 
         // 現在の状態が「READY」または「INPUT_OPERATOR」だった場合の処理
         if (state == InputState.READY || state == InputState.INPUT_OPERATOR) {
@@ -104,6 +104,11 @@ public class CalculatorModel {
 
         // 桁数を数えるためのカウンター
         int count = 0;
+
+        if (currentInput.length() == 0 && ch == '0') {
+            return false;
+
+        }
 
         // 現在入力されている文字列を、1文字目から順番に最後の文字までループ処理で確認
         for (int i = 0; i < currentInput.length(); i++) {
@@ -120,6 +125,7 @@ public class CalculatorModel {
             currentInput.append(ch);
             justCleared = false;
         }
+        return true;
     }
 
     /**
@@ -127,18 +133,18 @@ public class CalculatorModel {
      * すでに小数点が含まれている場合は追加しない
      * 新規入力の最初に押された場合は自動的に "0." から開始
      */
-    public void appendDot() {
+    public boolean appendDot() {
         if (justCleared == true) {
-            return;
+            return false;
         }
         // 現在の電卓の状態が「ERROR」だった場合の処理
         if (state == InputState.ERROR)
             // これ以降の処理を何もせず終了
-            return;
+            return  false;
 
         // 現在の状態が「READY」または「INPUT_OPERATOR」だった場合の処理
         if (state == InputState.READY || state == InputState.INPUT_OPERATOR) {
-            return;
+            return false;
 
         }
 
@@ -146,7 +152,9 @@ public class CalculatorModel {
         if (currentInput.indexOf(".") == -1) {
             // 小数点が含まれていない場合のみ、入力用バッファの末尾に小数点を追加
             currentInput.append(".");
+            return true;
         }
+        return false;
     }
 
     /**
@@ -166,7 +174,7 @@ public class CalculatorModel {
             return;
         }
 
-        if (currentInput.length() == 0 && op == Operator.SUB) {
+        if (currentInput.length() == 0 && op == Operator.SUB && justCleared == true) {
             currentInput.append("-");
             state = InputState.INPUT_NUMBER;
             justCleared = false;
@@ -291,8 +299,6 @@ public class CalculatorModel {
 
         // 保留中の演算子があるかを確認
         if (pendingOP != null) {
-
-            getDisplayString();
 
             if (currentInput.length() == 0) {
                 display.append(getDisplayString());
