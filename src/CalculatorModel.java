@@ -105,13 +105,19 @@ public class CalculatorModel {
         // 桁数を数えるためのカウンター
         int count = 0;
 
-        if (currentInput.length() == 0 && ch == '0') {
-            return false;
+        if (currentInput.toString().equals("0") && currentInput.indexOf(".") == -1) {
+            if (ch == '0') {
+                return false; // "00" にしないので無視
+            } else {
+                currentInput.setLength(0); // 先頭の "0" を消して
+                // このあと通常の append 処理で ch が追加されるようにする
+            }
 
         }
 
         // 現在入力されている文字列を、1文字目から順番に最後の文字までループ処理で確認
         for (int i = 0; i < currentInput.length(); i++) {
+
             // 取り出した文字が、小数点「.」ではなく、かつマイナス記号「-」でもない場合の処理
             if (currentInput.charAt(i) != '.' && currentInput.charAt(i) != '-') {
                 // 小数点「.」ではなく、かつマイナス記号「-」でもない場合桁数のカウントを 1 増やす
@@ -140,7 +146,7 @@ public class CalculatorModel {
         // 現在の電卓の状態が「ERROR」だった場合の処理
         if (state == InputState.ERROR)
             // これ以降の処理を何もせず終了
-            return  false;
+            return false;
 
         // 現在の状態が「READY」または「INPUT_OPERATOR」だった場合の処理
         if (state == InputState.READY || state == InputState.INPUT_OPERATOR) {
@@ -165,6 +171,11 @@ public class CalculatorModel {
      * @param op 入力された演算子（Operator型）
      */
     public void inputOperator(Operator op) {
+
+        if (state == InputState.ERROR && op == Operator.SUB) {
+            clearAll();
+            return;
+        }
         // 現在の電卓の状態が「ERROR」だった場合の処理
         if (state == InputState.ERROR)
             // これ以降の処理を何もせず終了
