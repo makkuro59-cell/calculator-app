@@ -176,6 +176,7 @@ public class CalculatorModel {
             clearAll();
             return;
         }
+
         // 現在の電卓の状態が「ERROR」だった場合の処理
         if (state == InputState.ERROR)
             // これ以降の処理を何もせず終了
@@ -191,6 +192,10 @@ public class CalculatorModel {
             justCleared = false;
             return;
 
+        }
+
+        if (currentInput.toString().equals("0") && pendingOP == null && op != Operator.SUB) {
+            return;
         }
 
         if (currentInput.length() == 0 && pendingOP == null && justCleared) {
