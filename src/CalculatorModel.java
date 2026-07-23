@@ -107,10 +107,11 @@ public class CalculatorModel {
 
         if (currentInput.toString().equals("0") && currentInput.indexOf(".") == -1) {
             if (ch == '0') {
-                return false; // "00" にしないので無視
+                // "00" にしないので無視
+                return false; 
             } else {
-                currentInput.setLength(0); // 先頭の "0" を消して
-                // このあと通常の append 処理で ch が追加されるようにする
+                // 先頭の "0" を消して、新しい数字を追加する
+                currentInput.setLength(0); 
             }
 
         }
@@ -172,6 +173,7 @@ public class CalculatorModel {
      */
     public void inputOperator(Operator op) {
 
+        // 現在の電卓の状態が「ERROR」かつ減算（-）の場合clearAll()を呼び出す
         if (state == InputState.ERROR && op == Operator.SUB) {
             clearAll();
             return;
@@ -182,10 +184,13 @@ public class CalculatorModel {
             // これ以降の処理を何もせず終了
             return;
 
+        //
         if (op == Operator.SUB && currentInput.length() == 1 && currentInput.charAt(0) == '-') {
             return;
         }
 
+
+        // まだ何も入力・計算していない状態で、かつ押された演算子が減算（-）の場合
         if (currentInput.length() == 0 && op == Operator.SUB && justCleared == true) {
             currentInput.append("-");
             state = InputState.INPUT_NUMBER;
@@ -194,12 +199,14 @@ public class CalculatorModel {
 
         }
 
+        // 現在の入力文字列が「0」で、保留中の演算子が未設定（null）で、かつ押された演算子が「-」以外の場合の処理
         if (currentInput.toString().equals("0") && pendingOP == null && op != Operator.SUB) {
             return;
         }
 
+        // まだ何も入力・計算していない状態での演算子入力は無視
         if (currentInput.length() == 0 && pendingOP == null && justCleared) {
-            // まだ何も入力・計算していない状態での演算子入力は無視
+
             return;
         }
 
